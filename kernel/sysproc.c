@@ -95,6 +95,6 @@ sys_uptime(void)
 uint64
 sys_getppid(void)
 {
-    struct proc *p = myproc();  // Obtener el proceso actual
-    return p->parent->pid;      // Retornar el ID del proceso padre
+    struct proc *p = myproc();  
+    return p->parent->pid;      // Lab 1
 }
