@@ -122,6 +122,10 @@ allocproc(void)
   return 0;
 
 found:
+
+  p->prioridad = 0; // Inicializa la prioridad en 0
+  p->boost = 1;     // Inicializa el boost en 1
+
   p->pid = allocpid();
   p->state = USED;
 
@@ -444,6 +448,8 @@ wait(uint64 addr)
 void
 scheduler(void)
 {
+
+  
   struct proc *p;
   struct cpu *c = mycpu();
 
@@ -478,6 +484,22 @@ scheduler(void)
       asm volatile("wfi");
     }
   }
+
+  
+    // Dentro de la función scheduler() en proc.c
+  for(p = proc; p < &proc[NPROC]; p++) {
+      if(p->state == RUNNABLE) { // Verifica si el proceso puede ejecutarse
+          p->prioridad += p->boost; // Aumenta la prioridad según el boost
+
+          // Cambiar el boost si la prioridad llega a los límites
+          if (p->prioridad >= 9) {
+              p->boost = -1; // Cambia el boost a -1 si alcanza 9
+          } else if (p->prioridad <= 0) {
+              p->boost = 1; // Cambia el boost a 1 si llega a 0
+          }
+      }
+  }
+
 }
 
 // Switch to scheduler.  Must hold only p->lock
