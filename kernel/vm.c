@@ -5,6 +5,9 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "spinlock.h"
+#include "proc.h"
+
 
 /*
  * the kernel's page table.
@@ -448,4 +451,46 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   } else {
     return -1;
   }
+}
+
+
+int mprotect(void *addr, int len) {
+    struct proc *p = myproc();
+    uint64 a = (uint64)addr;
+    uint64 end = a + len * PGSIZE;
+    
+    if (a % PGSIZE != 0 || a >= p->sz || end > p->sz) {
+        return -1;
+    }
+
+    for (; a < end; a += PGSIZE) {
+        pte_t *pte = walk(p->pagetable, a, 0);
+        if (pte == 0 || (*pte & PTE_V) == 0) {
+            return -1; 
+        }
+        *pte &= ~PTE_W;  // Limpia escritura
+    }
+
+    return 0; 
+}
+
+
+int munprotect(void *addr, int len) {
+    struct proc *p = myproc();
+    uint64 a = (uint64)addr;
+    uint64 end = a + len * PGSIZE;
+
+    if (a % PGSIZE != 0 || a >= p->sz || end > p->sz) {
+        return -1;
+    }
+
+    for (; a < end; a += PGSIZE) {
+        pte_t *pte = walk(p->pagetable, a, 0);
+        if (pte == 0 || (*pte & PTE_V) == 0) {
+            return -1;
+        }
+        *pte |= PTE_W;  // Establece escritura
+    }
+
+    return 0;
 }

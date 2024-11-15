@@ -6,6 +6,7 @@
 #include "spinlock.h"
 #include "proc.h"
 
+
 uint64
 sys_exit(void)
 {
@@ -90,4 +91,46 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+// Ensure these function declarations are available
+extern int mprotect(void *addr, int len);  
+extern int munprotect(void *addr, int len);
+
+#include <stddef.h> // Include this at the top of the file
+
+uint64
+sys_mprotect(void)
+{
+    void *addr;
+    int len;
+
+    // Call argaddr and argint without checking return value
+    argaddr(0, (uint64*)&addr);
+    argint(1, &len);
+
+    // Return -1 if either of the arguments are not valid (check if addr or len are zero or invalid)
+    if (addr == NULL || len < 0)
+        return -1;
+
+    // Call the mprotect function
+    return mprotect(addr, len);
+}
+
+uint64
+sys_munprotect(void)
+{
+    void *addr;
+    int len;
+
+    // Call argaddr and argint without checking return value
+    argaddr(0, (uint64*)&addr);
+    argint(1, &len);
+
+    // Return -1 if either of the arguments are not valid (check if addr or len are zero or invalid)
+    if (addr == NULL || len < 0)
+        return -1;
+
+    // Call the munprotect function
+    return munprotect(addr, len);
 }
