@@ -367,6 +367,15 @@ sys_open(void)
   iunlock(ip);
   end_op();
 
+  if ((ip->perm == 1 && (omode & O_WRONLY)) || 
+    (ip->perm == 2 && (omode & O_RDONLY)) || 
+    (ip->perm == 5 && (omode & (O_WRONLY | O_RDWR)))) {
+    iunlockput(ip);
+    return -1; // error: permisos no válidos
+}
+
+
+
   return fd;
 }
 
@@ -502,4 +511,31 @@ sys_pipe(void)
     return -1;
   }
   return 0;
+}
+
+
+
+int chmod(char *path, int mode) {
+    struct inode *ip;
+
+    if (mode < 0 || (mode > 3 && mode != 5))
+        return -1; // modo inválido
+
+    begin_op();
+    ip = namei(path);
+    if (ip == 0) {
+        end_op();
+        return -1; // archivo no encontrado
+    }
+    ilock(ip);
+    if (ip->perm == 5) {
+        iunlockput(ip);
+        end_op();
+        return -1; // archivo inmutable
+    }
+    ip->perm = mode;
+    iupdate(ip); // actualizar el inode en disco
+    iunlockput(ip);
+    end_op();
+    return 0;
 }

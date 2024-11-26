@@ -202,6 +202,9 @@ ialloc(uint dev, short type)
   struct buf *bp;
   struct dinode *dip;
 
+  ip->perm = 3;
+
+
   for(inum = 1; inum < sb.ninodes; inum++){
     bp = bread(dev, IBLOCK(inum, sb));
     dip = (struct dinode*)bp->data + inum%IPB;
@@ -473,6 +476,12 @@ readi(struct inode *ip, int user_dst, uint64 dst, uint off, uint n)
 {
   uint tot, m;
   struct buf *bp;
+
+  if (!(ip->perm & 1)) {
+    return -1; // error: sin permiso de lectura
+  }
+
+
 
   if(off > ip->size || off + n < off)
     return 0;
