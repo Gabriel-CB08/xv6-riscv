@@ -105,3 +105,15 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 };
+
+
+
+#define MSG_QUEUE_SIZE 64  // Número máximo de mensajes en la cola
+
+typedef struct msg_queue {
+    message messages[MSG_QUEUE_SIZE]; // mensajes
+    int front;                        // Índicprimeer mensaje
+    int rear;                         // Índice último mensaje
+    int count;                        // mensajes actuales
+    struct spinlock lock;             // Spinlock
+} msg_queue;

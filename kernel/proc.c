@@ -693,3 +693,16 @@ procdump(void)
     printf("\n");
   }
 }
+
+
+
+
+
+struct msg_queue msg_queue;
+
+void init_msg_queue() {
+    initlock(&msg_queue.lock, "msg_queue");
+    msg_queue.front = 0;
+    msg_queue.rear = 0;
+    msg_queue.count = 0;
+}

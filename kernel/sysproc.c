@@ -91,3 +91,58 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+
+int
+sys_send(void) {
+    int target_pid;
+    char *msg_content;
+
+    // PID destino y mensaje
+    if (argint(0, &target_pid) < 0 || argstr(1, &msg_content) < 0)
+        return -1;
+
+    acquire(&msg_queue.lock);
+
+    if (msg_queue.count == MSG_QUEUE_SIZE) {
+        release(&msg_queue.lock);
+        return -1;
+    }
+
+    // Agregar mensaje
+    msg_queue.messages[msg_queue.rear].sender_pid = myproc()->pid;
+    strncpy(msg_queue.messages[msg_queue.rear].content, msg_content, sizeof(msg_queue.messages[0].content));
+    msg_queue.rear = (msg_queue.rear + 1) % MSG_QUEUE_SIZE;
+    msg_queue.count++;
+
+    wakeup(&msg_queue); // Despierta procesos bloqueados
+    release(&msg_queue.lock);
+
+    return 0;
+}
+
+
+int
+sys_receive(void) {
+    message *msg_ptr;
+
+    // Obtén puntero
+    if (argptr(0, (void*)&msg_ptr, sizeof(message)) < 0)
+        return -1;
+
+    acquire(&msg_queue.lock);
+
+    while (msg_queue.count == 0) {
+        sleep(&msg_queue, &msg_queue.lock);
+    }
+
+    // Extraer mensaje
+    *msg_ptr = msg_queue.messages[msg_queue.front];
+    msg_queue.front = (msg_queue.front + 1) % MSG_QUEUE_SIZE;
+    msg_queue.count--;
+
+    release(&msg_queue.lock);
+
+    return 0;
+}
