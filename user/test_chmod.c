@@ -1,6 +1,6 @@
-#include "kernel/types.h"
-#include "kernel/stat.h"
-#include "user/user.h"
+#include "/home/gabriel/Sistemas_Operativos/xv6-riscv/kernel/types.h"
+#include "/home/gabriel/Sistemas_Operativos/xv6-riscv/kernel/stat.h"
+#include "/home/gabriel/Sistemas_Operativos/xv6-riscv/user/user.h"
 
 int main() {
     char *filename = "testfile";

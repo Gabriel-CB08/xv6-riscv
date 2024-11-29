@@ -37,7 +37,7 @@ struct dinode {
   uint size;            // Size of file (bytes)
   uint addrs[NDIRECT+1];   // Data block addresses
   
-  uint perm; //
+  uint perm; // T5
 
 };
 

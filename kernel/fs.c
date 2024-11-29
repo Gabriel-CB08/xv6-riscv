@@ -268,6 +268,15 @@ iget(uint dev, uint inum)
   // Recycle an inode entry.
   if(empty == 0)
     panic("iget: no inodes");
+  
+  dip = (struct dinode*)bp->data + ip->inum % IPB;
+
+  ip->type = dip->type;
+  ip->major = dip->major;
+  ip->minor = dip->minor;
+  ip->nlink = dip->nlink;
+  ip->size = dip->size;
+  ip->perm = dip->perm; 
 
   ip = empty;
   ip->dev = dev;
